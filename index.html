@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)file:///C:/Users/%EA%B8%B0%ED%9A%8D%EC%8B%A4/Downloads/index.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자금 현황 대시보드</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f4f0;
+      --bg3: #eeede8;
+      --text: #1a1a18;
+      --text2: #5f5e5a;
+      --text3: #9c9a92;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --info-bg: #e6f1fb;
+      --info: #185fa5;
+      --success-bg: #eaf3de;
+      --success: #3b6d11;
+      --danger-bg: #fcebeb;
+      --danger: #a32d2d;
+      --warning-bg: #faeeda;
+      --warning: #854f0b;
+      --purple-bg: #eeedfe;
+      --purple: #3c3489;
+      --teal-bg: #e1f5ee;
+      --teal: #085041;
+      --coral-bg: #faece7;
+      --coral: #712b13;
+      --amber-bg: #faeeda;
+      --amber: #633806;
+      --pink-bg: #fbeaf0;
+      --pink: #72243e;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1a;
+        --bg2: #26261f;
+        --bg3: #2e2e27;
+        --text: #e8e6dc;
+        --text2: #b4b2a9;
+        --text3: #6e6c65;
+        --border: rgba(255,255,255,0.1);
+        --border2: rgba(255,255,255,0.18);
+        --info-bg: #0c2842;
+        --info: #85b7eb;
+        --success-bg: #172504;
+        --success: #97c459;
+        --danger-bg: #2c0d0d;
+        --danger: #f09595;
+        --warning-bg: #241502;
+        --warning: #ef9f27;
+        --purple-bg: #1a1742;
+        --purple: #afa9ec;
+        --teal-bg: #022820;
+        --teal: #5dcaa5;
+        --coral-bg: #2e0e05;
+        --coral: #f0997b;
+        --amber-bg: #241502;
+        --amber: #ef9f27;
+        --pink-bg: #240b16;
+        --pink: #ed93b1;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg2);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── 레이아웃 ── */
+    .app { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .top-bar h1 { font-size: 20px; font-weight: 500; }
+    .top-bar .sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* ── 탭 ── */
+    .tab-bar {
+      display: flex; gap: 2px; margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      font-size: 13px; padding: 8px 16px; cursor: pointer;
+      background: transparent; border: none; color: var(--text2);
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+    .tab:hover:not(.active) { color: var(--text); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+
+    /* ── 메트릭 그리드 ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+    }
+    .metric {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .metric .lbl { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+    .metric .val { font-size: 18px; font-weight: 500; }
+    .metric .val.sm { font-size: 14px; }
+
+    /* ── 섹션 헤더 ── */
+    .sec-head {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .sec-title { font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 0.02em; }
+
+    /* ── 버튼 ── */
+    .btn {
+      font-size: 13px; padding: 7px 14px; border-radius: var(--radius);
+      cursor: pointer; border: 0.5px solid var(--border2);
+      background: transparent; color: var(--text);
+    }
+    .btn:hover { background: var(--bg2); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-info { border-color: var(--info); color: var(--info); }
+    .btn-info:hover { background: var(--info-bg); }
+    .btn-danger { border-color: var(--danger); color: var(--danger); font-size: 12px; padding: 4px 10px; }
+    .btn-danger:hover { background: var(--danger-bg); }
+    .btn-sm { font-size: 12px; padding: 4px 10px; }
+
+    /* ── 행 아이템 ── */
+    .row-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 0.5px solid var(--border);
+    }
+    .row-item:last-child { border-bottom: none; }
+    .row-item:hover { background: none; }
+    .row-name { font-size: 13px; font-weight: 500; }
+    .row-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .row-val { font-size: 13px; font-weight: 500; text-align: right; }
+
+    /* ── 배지 ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; padding: 3px 8px; border-radius: var(--radius);
+    }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-idle { background: var(--bg2); color: var(--text3); }
+    .badge-loading { background: var(--warning-bg); color: var(--warning); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* ── 스피너 ── */
+    .spinner {
+      width: 12px; height: 12px;
+      border: 1.5px solid var(--border2);
+      border-top-color: var(--warning);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 바 ── */
+    .bar-wrap { display: flex; align-items: center; gap: 8px; flex: 1; margin: 0 14px; max-width: 160px; }
+    .bar-bg { flex: 1; height: 4px; background: var(--bg3); border-radius: 2px; }
+    .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+    /* ── 회사 섹션 ── */
+    .co-section {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .co-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; cursor: pointer; user-select: none;
+    }
+    .co-header:hover { background: var(--bg2); }
+    .co-badge {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 500; flex-shrink: 0;
+    }
+    .co-info { margin-left: 10px; }
+    .co-name { font-size: 14px; font-weight: 500; }
+    .co-count { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .co-total { font-size: 14px; font-weight: 500; }
+    .co-pct { font-size: 11px; color: var(--text3); text-align: right; }
+    .chevron { font-size: 11px; color: var(--text3); margin-left: 10px; transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* ── 입력 폼 ── */
+    .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .input-row input, .form-group input {
+      flex: 1; padding: 7px 10px; font-size: 13px;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius);
+      background: var(--bg); color: var(--text);
+    }
+    .input-row input:focus, .form-group input:focus {
+      outline: none; border-color: var(--info);
+    }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { font-size: 11px; color: var(--text3); display: block; margin-bottom: 4px; }
+    .form-group input { width: 100%; }
+
+    /* ── 빈 상태 ── */
+    .empty { text-align: center; padding: 32px 16px; color: var(--text3); font-size: 13px; }
+
+    /* ── 자산 바 ── */
+    .asset-row { display: flex; align-items: center; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+    .asset-row:last-child { border-bottom: none; }
+    .asset-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; }
+    .asset-name { font-size: 13px; color: var(--text2); min-width: 70px; }
+    .asset-pct { font-size: 11px; color: var(--text3); min-width: 30px; text-align: right; }
+    .asset-val { font-size: 13px; font-weight: 500; min-width: 110px; text-align: right; }
+
+    /* ── 종목 테이블 ── */
+    .holding-grid {
+      display: grid;
+      grid-template-columns: 1fr 55px 80px 80px 65px;
+      gap: 4px; align-items: center;
+    }
+    .holding-hd { font-size: 11px; color: var(--text3); text-align: right; }
+    .holding-hd:first-child { text-align: left; }
+    .holding-cell { font-size: 13px; color: var(--text2); text-align: right; padding: 7px 0; border-bottom: 0.5px solid var(--border); }
+    .holding-cell:first-child { color: var(--text); text-align: left; font-weight: 500; }
+
+    /* ── config 노트 ── */
+    .config-note {
+      font-size: 12px; color: var(--text3);
+      padding: 10px 14px; background: var(--bg2);
+      border-radius: var(--radius); margin-top: 10px; line-height: 1.7;
+    }
+    .config-note a { color: var(--info); text-decoration: none; }
+
+    /* ── 모달 ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-bg.active { display: flex; }
+    .modal {
+      background: var(--bg); border: 0.5px solid var(--border2);
+      border-radius: var(--radius-lg); padding: 24px;
+      width: 340px; max-width: 92vw;
+    }
+    .modal h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+
+    /* ── 반응형 ── */
+    @media (max-width: 600px) {
+      .holding-grid { grid-template-columns: 1fr 50px 70px 65px; }
+      .holding-grid .col-cost { display: none; }
+      .bar-wrap { max-width: 80px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 상단 헤더 -->
+  <div class="top-bar">
+    <div>
+      <h1>자금 현황 대시보드</h1>
+      <div class="sub" id="last-updated">기준: 2026. 4. 16. 오전 10:07</div>
+    </div>
+    <button class="btn btn-info" onclick="openModal(&#39;modal-add-company&#39;)">+ 회사 추가</button>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab(&#39;main&#39;)">전체 현황</button>
+    <button class="tab" onclick="switchTab(&#39;woori&#39;)">우리은행 조회</button>
+    <button class="tab" onclick="switchTab(&#39;kb&#39;)">KB증권 자산</button>
+    <button class="tab" onclick="switchTab(&#39;config&#39;)">API 설정</button>
+  </div>
+
+  <!-- ══ 전체 현황 패널 ══ -->
+  <div class="panel active" id="panel-main">
+    <div class="metric-grid" id="main-metrics">
+    <div class="metric"><div class="lbl">총 보유 자금</div><div class="val sm">₩0</div></div>
+    <div class="metric"><div class="lbl">관리 회사 수</div><div class="val">0개</div></div>
+    <div class="metric"><div class="lbl">총 계좌 수</div><div class="val">0개</div></div>
+    <div class="metric"><div class="lbl">회사당 평균</div><div class="val sm">₩0</div></div>
+  </div>
+    <div id="companies-list"><div class="empty">등록된 회사가 없습니다.<br>오른쪽 상단 "+ 회사 추가" 버튼으로 시작하세요.</div></div>
+  </div>
+
+  <!-- ══ 우리은행 패널 ══ -->
+  <div class="panel" id="panel-woori">
+    <div class="sec-head">
+      <span class="sec-title">전 회사 우리은행 계좌</span>
+      <button class="btn btn-info" id="woori-btn" onclick="refreshWoori()">잔액 일괄조회</button>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="lbl">우리은행 총 잔액</div><div class="val sm" id="wm-total">-</div></div>
+      <div class="metric"><div class="lbl">연동 계좌 수</div><div class="val" id="wm-count">-</div></div>
+      <div class="metric"><div class="lbl">마지막 조회</div><div class="val sm" id="wm-time">-</div></div>
+    </div>
+    <div class="card" id="woori-list-card"><div class="empty">우리은행 계좌를 등록하고 "잔액 일괄조회"를 눌러주세요.</div></div>
+    <div style="margin-top:14px;">
+      <div class="sec-title" style="margin-bottom:8px;">계좌 등록</div>
+      <div class="input-row">
+        <input id="w-company" placeholder="회사명">
+        <input id="w-accno" placeholder="계좌번호">
+        <button class="btn btn-info" onclick="addWooriAccount()">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ KB증권 패널 ══ -->
+  <div class="panel" id="panel-kb">
+    <div class="sec-head">
+      <span class="sec-title">전 회사 KB증권 계좌</span>
+      <button class="btn btn-info" id="kb-btn" onclick="refreshKB()">자산 일괄조회</button>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="lbl">총 평가자산</div><div class="val sm" id="kb-total">-</div></div>
+      <div class="metric"><div class="lbl">총 매입금액</div><div class="val sm" id="kb-cost">-</div></div>
+      <div class="metric"><div class="lbl">평가손익</div><div class="val sm positive" id="kb-pnl">-</div></div>
+      <div class="metric"><div class="lbl">수익률</div><div class="val positive" id="kb-rate">-</div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="sec-title" style="margin-bottom:12px;">자산 구성</div>
+      <div id="kb-bars"><div class="empty">KB증권 계좌를 등록하고 조회해주세요.</div></div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:10px;">종목별 보유현황</div>
+      <div id="kb-holdings"><div class="empty">데이터 없음</div></div>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="sec-title" style="margin-bottom:8px;">계좌 등록</div>
+      <div class="input-row">
+        <input id="kb-company" placeholder="회사명">
+        <input id="kb-accno" placeholder="계좌번호">
+        <button class="btn btn-info" onclick="addKBAccount()">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ API 설정 패널 ══ -->
+  <div class="panel" id="panel-config">
+    <div class="card" style="margin-bottom:12px;">
+      <div class="sec-title" style="margin-bottom:14px;">우리은행 오픈뱅킹 API</div>
+      <div class="form-group">
+        <label>Vercel Function URL (예: /api/woori)</label>
+        <input id="cfg-woori-url" placeholder="/api/woori">
+      </div>
+      <div class="form-group">
+        <label>액세스 토큰 (테스트용 — 실제 운영 시 Vercel 환경변수에 보관)</label>
+        <input id="cfg-woori-token" type="password" placeholder="Bearer token">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-info" onclick="saveConfig(&#39;woori&#39;)">저장</button>
+        <span id="cfg-woori-msg" style="font-size:12px;color:var(--text3);"></span>
+      </div>
+      <div class="config-note">
+        금융결제원 오픈뱅킹 API 사용 기준입니다.<br>
+        1. <a href="https://developers.openbanking.or.kr/" target="_blank">오픈뱅킹 개발자센터</a>에서 앱 등록<br>
+        2. OAuth 인증 후 액세스 토큰 발급<br>
+        3. API 키는 Vercel 대시보드 → Settings → Environment Variables에 저장하세요.
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:14px;">KB증권 오픈API</div>
+      <div class="form-group">
+        <label>Vercel Function URL (예: /api/kb)</label>
+        <input id="cfg-kb-url" placeholder="/api/kb">
+      </div>
+      <div class="form-group">
+        <label>App Key</label>
+        <input id="cfg-kb-appkey" type="password" placeholder="App Key">
+      </div>
+      <div class="form-group">
+        <label>App Secret</label>
+        <input id="cfg-kb-secret" type="password" placeholder="App Secret">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-info" onclick="saveConfig(&#39;kb&#39;)">저장</button>
+        <span id="cfg-kb-msg" style="font-size:12px;color:var(--text3);"></span>
+      </div>
+      <div class="config-note">
+        KB증권 오픈API 사용 기준입니다.<br>
+        1. <a href="https://openapi.kbsec.com/" target="_blank">KB증권 오픈API</a>에서 앱 등록 후 App Key/Secret 발급<br>
+        2. 잔고조회 (kt00018), 보유종목 (kt00019) API를 사용합니다.<br>
+        3. 토큰 갱신은 Vercel Function 내에서 처리하세요.
+      </div>
+    </div>
+  </div>
+</div><!-- /.app -->
+
+<!-- ══ 모달: 회사 추가 ══ -->
+<div class="modal-bg" id="modal-add-company">
+  <div class="modal">
+    <h3>회사 추가</h3>
+    <div class="form-group"><label>회사명</label><input id="new-co-name" placeholder="예: (주)한국무역"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal(&#39;modal-add-company&#39;)">취소</button>
+      <button class="btn btn-info" onclick="addCompany()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 모달: 계좌 추가 ══ -->
+<div class="modal-bg" id="modal-add-account">
+  <div class="modal">
+    <h3>계좌 추가</h3>
+    <div class="form-group"><label>계좌 이름</label><input id="na-name" placeholder="예: 운영 계좌"></div>
+    <div class="form-group"><label>은행</label><input id="na-bank" placeholder="예: 국민은행"></div>
+    <div class="form-group"><label>잔액 (원)</label><input id="na-balance" type="number" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal(&#39;modal-add-account&#39;)">취소</button>
+      <button class="btn btn-info" onclick="addAccount()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 모달: 잔액 수정 ══ -->
+<div class="modal-bg" id="modal-edit-account">
+  <div class="modal">
+    <h3>잔액 수정</h3>
+    <div class="form-group"><label id="edit-acc-label">계좌명</label><input id="edit-acc-balance" type="number"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal(&#39;modal-edit-account&#39;)">취소</button>
+      <button class="btn btn-info" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════
+   데이터 & 상태
+════════════════════════════════ */
+let companies = [];
+let wooriAccounts = [];
+let kbAccounts = [];
+let config = { woori: { url: '/api/woori', token: '' }, kb: { url: '/api/kb', appkey: '', secret: '' } };
+let expanded = {};
+let editTarget = null;
+let addAccountTarget = null;
+let nextCoId = 1, nextAccId = 1;
+
+const CO_COLORS = [
+  { bg: '#eeedfe', text: '#3c3489' },
+  { bg: '#e1f5ee', text: '#085041' },
+  { bg: '#faece7', text: '#712b13' },
+  { bg: '#faeeda', text: '#633806' },
+  { bg: '#fbeaf0', text: '#72243e' },
+];
+const BAR_COLORS = ['#534ab7','#0f6e56','#993c1d','#854f0b','#185fa5'];
+
+/* ════════════════════════════════
+   유틸
+════════════════════════════════ */
+const fmt = n => '₩' + Math.round(n).toLocaleString('ko-KR');
+const fmtPct = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+const totalOf = co => co.accounts.reduce((s, a) => s + a.balance, 0);
+const grandTotal = () => companies.reduce((s, co) => s + totalOf(co), 0);
+
+function now() {
+  const d = new Date();
+  return d.toLocaleDateString('ko-KR') + ' ' + d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function statusBadge(s) {
+  if (s === 'ok') return `<span class="badge badge-success"><span class="dot"></span>완료</span>`;
+  if (s === 'loading') return `<span class="badge badge-loading"><span class="spinner"></span>조회중</span>`;
+  if (s === 'error') return `<span class="badge badge-danger"><span class="dot"></span>오류</span>`;
+  return `<span class="badge badge-idle"><span class="dot"></span>대기</span>`;
+}
+
+/* ════════════════════════════════
+   탭
+════════════════════════════════ */
+function switchTab(t) {
+  const tabs = ['main', 'woori', 'kb', 'config'];
+  document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', tabs[i] === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + t).classList.add('active');
+}
+
+/* ════════════════════════════════
+   모달
+════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-bg').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+});
+
+/* ════════════════════════════════
+   전체 현황 패널 렌더링
+════════════════════════════════ */
+function renderMain() {
+  document.getElementById('last-updated').textContent = '기준: ' + now();
+
+  const total = grandTotal();
+  const coCount = companies.length;
+  const accCount = companies.reduce((s, co) => s + co.accounts.length, 0);
+  const avg = coCount > 0 ? Math.round(total / coCount) : 0;
+
+  document.getElementById('main-metrics').innerHTML = `
+    <div class="metric"><div class="lbl">총 보유 자금</div><div class="val sm">${fmt(total)}</div></div>
+    <div class="metric"><div class="lbl">관리 회사 수</div><div class="val">${coCount}개</div></div>
+    <div class="metric"><div class="lbl">총 계좌 수</div><div class="val">${accCount}개</div></div>
+    <div class="metric"><div class="lbl">회사당 평균</div><div class="val sm">${fmt(avg)}</div></div>
+  `;
+
+  const list = document.getElementById('companies-list');
+  list.innerHTML = '';
+
+  if (companies.length === 0) {
+    list.innerHTML = '<div class="empty">등록된 회사가 없습니다.<br>오른쪽 상단 "+ 회사 추가" 버튼으로 시작하세요.</div>';
+    return;
+  }
+
+  const maxT = Math.max(...companies.map(co => totalOf(co)), 1);
+
+  companies.forEach((co, ci) => {
+    const color = CO_COLORS[ci % CO_COLORS.length];
+    const barColor = BAR_COLORS[ci % BAR_COLORS.length];
+    const coTotal = totalOf(co);
+    const pct = Math.round(coTotal / maxT * 100);
+    const isOpen = !!expanded[co.id];
+
+    let accsHtml = '';
+    if (isOpen) {
+      const maxBal = Math.max(...co.accounts.map(a => a.balance), 1);
+      if (co.accounts.length === 0) {
+        accsHtml = '<div style="padding:12px 16px;font-size:12px;color:var(--text3);">등록된 계좌가 없습니다.</div>';
+      } else {
+        accsHtml = co.accounts.map(acc => {
+          const bPct = Math.round(acc.balance / maxBal * 100);
+          return `<div class="row-item" style="padding:10px 16px;">
+            <div>
+              <div class="row-name" style="font-size:13px;">${acc.name}</div>
+              <div class="row-sub">${acc.bank}</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill" style="width:${bPct}%;background:${barColor};"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="row-val">${fmt(acc.balance)}</div>
+              <button class="btn btn-sm" onclick="openEditModal(${co.id},${acc.id})">수정</button>
+              <button class="btn btn-danger" onclick="deleteAccount(${co.id},${acc.id})">삭제</button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      accsHtml += `<div style="padding:10px 16px;border-top:0.5px solid var(--border);display:flex;gap:8px;">
+        <button class="btn btn-info btn-sm" onclick="openAddAccountModal(${co.id})">+ 계좌 추가</button>
+        <button class="btn btn-danger" onclick="deleteCompany(${co.id})">회사 삭제</button>
+      </div>`;
+    }
+
+    const sec = document.createElement('div');
+    sec.className = 'co-section';
+    sec.innerHTML = `
+      <div class="co-header" onclick="toggleCo(${co.id})">
+        <div style="display:flex;align-items:center;">
+          <div class="co-badge" style="background:${color.bg};color:${color.text};">${co.name.charAt(0)}</div>
+          <div class="co-info">
+            <div class="co-name">${co.name}</div>
+            <div class="co-count">계좌 ${co.accounts.length}개</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div>
+            <div class="co-total">${fmt(coTotal)}</div>
+            <div class="co-pct">${pct}%</div>
+          </div>
+          <div class="chevron ${isOpen ? 'open' : ''}">▼</div>
+        </div>
+      </div>
+      ${isOpen ? `<div>${accsHtml}</div>` : ''}
+    `;
+    list.appendChild(sec);
+  });
+}
+
+/* ════════════════════════════════
+   전체 현황 — CRUD
+════════════════════════════════ */
+function addCompany() {
+  const name = document.getElementById('new-co-name').value.trim();
+  if (!name) return;
+  companies.push({ id: nextCoId++, name, accounts: [] });
+  closeModal('modal-add-company');
+  document.getElementById('new-co-name').value = '';
+  renderMain();
+}
+
+function deleteCompany(coId) {
+  companies = companies.filter(c => c.id !== coId);
+  delete expanded[coId];
+  renderMain();
+}
+
+function toggleCo(id) {
+  expanded[id] = !expanded[id];
+  renderMain();
+}
+
+function openAddAccountModal(coId) {
+  addAccountTarget = coId;
+  ['na-name','na-bank','na-balance'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-add-account');
+}
+
+function addAccount() {
+  const co = companies.find(c => c.id === addAccountTarget);
+  if (!co) return;
+  const name = document.getElementById('na-name').value.trim();
+  const bank = document.getElementById('na-bank').value.trim();
+  const balance = parseFloat(document.getElementById('na-balance').value) || 0;
+  if (!name) return;
+  co.accounts.push({ id: nextAccId++, name, bank, balance });
+  closeModal('modal-add-account');
+  renderMain();
+}
+
+function deleteAccount(coId, accId) {
+  const co = companies.find(c => c.id === coId);
+  if (co) co.accounts = co.accounts.filter(a => a.id !== accId);
+  renderMain();
+}
+
+function openEditModal(coId, accId) {
+  const co = companies.find(c => c.id === coId);
+  const acc = co && co.accounts.find(a => a.id === accId);
+  if (!acc) return;
+  editTarget = { coId, accId };
+  document.getElementById('edit-acc-label').textContent = `${acc.name} (${acc.bank})`;
+  document.getElementById('edit-acc-balance').value = acc.balance;
+  openModal('modal-edit-account');
+}
+
+function saveEdit() {
+  const co = companies.find(c => c.id === editTarget.coId);
+  const acc = co && co.accounts.find(a => a.id === editTarget.accId);
+  if (!acc) return;
+  acc.balance = parseFloat(document.getElementById('edit-acc-balance').value) || 0;
+  closeModal('modal-edit-account');
+  renderMain();
+}
+
+/* ════════════════════════════════
+   우리은행 패널
+════════════════════════════════ */
+function addWooriAccount() {
+  const co = document.getElementById('w-company').value.trim();
+  const ac = document.getElementById('w-accno').value.trim();
+  if (!co || !ac) return;
+  wooriAccounts.push({ company: co, accno: ac, balance: null, status: 'idle' });
+  document.getElementById('w-company').value = '';
+  document.getElementById('w-accno').value = '';
+  renderWoori();
+}
+
+function renderWoori() {
+  const el = document.getElementById('woori-list-card');
+  if (wooriAccounts.length === 0) {
+    el.innerHTML = '<div class="empty">우리은행 계좌를 등록하고 "잔액 일괄조회"를 눌러주세요.</div>';
+    document.getElementById('wm-total').textContent = '-';
+    document.getElementById('wm-count').textContent = '-';
+    return;
+  }
+  el.innerHTML = wooriAccounts.map((a, i) => `
+    <div class="row-item">
+      <div>
+        <div class="row-name">${a.company}</div>
+        <div class="row-sub">${a.accno}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="text-align:right;">
+          <div class="row-val">${a.balance !== null ? fmt(a.balance) : '-'}</div>
+          <div style="margin-top:3px;">${statusBadge(a.status)}</div>
+        </div>
+        <button class="btn btn-danger" onclick="removeWoori(${i})">삭제</button>
+      </div>
+    </div>
+  `).join('');
+
+  const fetched = wooriAccounts.filter(a => a.balance !== null);
+  const total = fetched.reduce((s, a) => s + a.balance, 0);
+  document.getElementById('wm-total').textContent = fetched.length > 0 ? fmt(total) : '-';
+  document.getElementById('wm-count').textContent = wooriAccounts.length + '개';
+}
+
+function removeWoori(i) { wooriAccounts.splice(i, 1); renderWoori(); }
+
+async function refreshWoori() {
+  if (wooriAccounts.length === 0) return;
+  const btn = document.getElementById('woori-btn');
+  btn.disabled = true; btn.textContent = '조회 중...';
+
+  for (let i = 0; i < wooriAccounts.length; i++) {
+    wooriAccounts[i].status = 'loading';
+    renderWoori();
+    try {
+      if (config.woori.url && config.woori.url !== '/api/woori') {
+        // 실제 Vercel Function 호출
+        const res = await fetch(config.woori.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + config.woori.token },
+          body: JSON.stringify({ account_no: wooriAccounts[i].accno })
+        });
+        const data = await res.json();
+        wooriAccounts[i].balance = data.balance;
+      } else {
+        // 모의 데이터 (API 미연동 시)
+        await new Promise(r => setTimeout(r, 700));
+        wooriAccounts[i].balance = Math.round((Math.random() * 900 + 50) * 1000000);
+      }
+      wooriAccounts[i].status = 'ok';
+    } catch (e) {
+      wooriAccounts[i].status = 'error';
+    }
+    renderWoori();
+  }
+
+  document.getElementById('wm-time').textContent = now();
+  btn.disabled = false; btn.textContent = '잔액 일괄조회';
+}
+
+/* ════════════════════════════════
+   KB증권 패널
+════════════════════════════════ */
+function addKBAccount() {
+  const co = document.getElementById('kb-company').value.trim();
+  const ac = document.getElementById('kb-accno').value.trim();
+  if (!co || !ac) return;
+  kbAccounts.push({ company: co, accno: ac, assets: null, status: 'idle' });
+  document.getElementById('kb-company').value = '';
+  document.getElementById('kb-accno').value = '';
+  renderKB();
+}
+
+function mockKBAssets() {
+  const cats = ['국내주식','채권','MMF','해외주식','현금'];
+  const ratios = [0.35, 0.25, 0.20, 0.12, 0.08];
+  const total = Math.round((Math.random() * 1500 + 200) * 1000000);
+  const cost = Math.round(total * (0.88 + Math.random() * 0.15));
+  return {
+    total, cost,
+    cats: cats.map((n, i) => ({ name: n, val: Math.round(total * ratios[i]), ratio: ratios[i] })),
+    holdings: [
+      { name: '삼성전자', qty: 200, avg: 71000, cur: Math.round(71000 * (0.9 + Math.random() * 0.3)) },
+      { name: 'SK하이닉스', qty: 50, avg: 182000, cur: Math.round(182000 * (0.9 + Math.random() * 0.3)) },
+      { name: '국고채 24-5', qty: 10, avg: 9850000, cur: Math.round(9850000 * (0.99 + Math.random() * 0.02)) },
+      { name: 'TIGER MMF', qty: 1000, avg: 100000, cur: 100050 },
+    ]
+  };
+}
+
+function renderKB() {
+  const fetched = kbAccounts.filter(a => a.assets);
+  const grandTot = fetched.reduce((s, a) => s + a.assets.total, 0);
+  const grandCost = fetched.reduce((s, a) => s + a.assets.cost, 0);
+  const pnl = grandTot - grandCost;
+  const rate = grandCost > 0 ? pnl / grandCost * 100 : 0;
+
+  document.getElementById('kb-total').textContent = fetched.length > 0 ? fmt(grandTot) : '-';
+  document.getElementById('kb-cost').textContent = fetched.length > 0 ? fmt(grandCost) : '-';
+
+  const pnlEl = document.getElementById('kb-pnl');
+  pnlEl.textContent = fetched.length > 0 ? fmt(pnl) : '-';
+  pnlEl.className = 'val sm ' + (pnl >= 0 ? 'positive' : 'negative');
+
+  const rateEl = document.getElementById('kb-rate');
+  rateEl.textContent = fetched.length > 0 ? fmtPct(rate) : '-';
+  rateEl.className = 'val ' + (rate >= 0 ? 'positive' : 'negative');
+
+  if (fetched.length === 0) {
+    document.getElementById('kb-bars').innerHTML = '<div class="empty">KB증권 계좌를 등록하고 조회해주세요.</div>';
+    document.getElementById('kb-holdings').innerHTML = '<div class="empty">데이터 없음</div>';
+    return;
+  }
+
+  // 자산 구성 바
+  const merged = {};
+  fetched.forEach(a => a.assets.cats.forEach(c => { merged[c.name] = (merged[c.name] || 0) + c.val; }));
+  const cats = Object.entries(merged).sort((a, b) => b[1] - a[1]);
+  const maxVal = cats[0][1];
+  document.getElementById('kb-bars').innerHTML = cats.map(([name, val], i) => `
+    <div class="asset-row">
+      <div class="asset-dot" style="background:${BAR_COLORS[i % BAR_COLORS.length]};"></div>
+      <div class="asset-name">${name}</div>
+      <div class="bar-wrap" style="max-width:200px;">
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:${Math.round(val/maxVal*100)}%;background:${BAR_COLORS[i % BAR_COLORS.length]};"></div>
+        </div>
+      </div>
+      <div class="asset-pct">${Math.round(val/grandTot*100)}%</div>
+      <div class="asset-val">${fmt(val)}</div>
+    </div>
+  `).join('');
+
+  // 종목 테이블
+  const holdings = fetched.flatMap(a => a.assets.holdings);
+  document.getElementById('kb-holdings').innerHTML = `
+    <div class="holding-grid" style="margin-bottom:8px;">
+      <div class="holding-hd">종목</div>
+      <div class="holding-hd">수량</div>
+      <div class="holding-hd col-cost">평균단가</div>
+      <div class="holding-hd">현재가</div>
+      <div class="holding-hd">손익률</div>
+    </div>
+    ${holdings.map(h => {
+      const r = (h.cur - h.avg) / h.avg * 100;
+      const cls = r >= 0 ? 'positive' : 'negative';
+      return `<div class="holding-grid">
+        <div class="holding-cell">${h.name}</div>
+        <div class="holding-cell">${h.qty.toLocaleString()}</div>
+        <div class="holding-cell col-cost">${h.avg.toLocaleString()}</div>
+        <div class="holding-cell">${h.cur.toLocaleString()}</div>
+        <div class="holding-cell ${cls}">${fmtPct(r)}</div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+async function refreshKB() {
+  if (kbAccounts.length === 0) return;
+  const btn = document.getElementById('kb-btn');
+  btn.disabled = true; btn.textContent = '조회 중...';
+
+  for (let i = 0; i < kbAccounts.length; i++) {
+    kbAccounts[i].status = 'loading';
+    try {
+      if (config.kb.url && config.kb.url !== '/api/kb') {
+        const res = await fetch(config.kb.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ account_no: kbAccounts[i].accno, appkey: config.kb.appkey, appsecret: config.kb.secret })
+        });
+        kbAccounts[i].assets = await res.json();
+      } else {
+        await new Promise(r => setTimeout(r, 800));
+        kbAccounts[i].assets = mockKBAssets();
+      }
+      kbAccounts[i].status = 'ok';
+    } catch (e) {
+      kbAccounts[i].status = 'error';
+    }
+    renderKB();
+  }
+
+  btn.disabled = false; btn.textContent = '자산 일괄조회';
+}
+
+/* ════════════════════════════════
+   API 설정
+════════════════════════════════ */
+function saveConfig(type) {
+  if (type === 'woori') {
+    config.woori.url = document.getElementById('cfg-woori-url').value.trim() || '/api/woori';
+    config.woori.token = document.getElementById('cfg-woori-token').value.trim();
+    const msg = document.getElementById('cfg-woori-msg');
+    msg.textContent = '저장됨'; setTimeout(() => msg.textContent = '', 2000);
+  } else {
+    config.kb.url = document.getElementById('cfg-kb-url').value.trim() || '/api/kb';
+    config.kb.appkey = document.getElementById('cfg-kb-appkey').value.trim();
+    config.kb.secret = document.getElementById('cfg-kb-secret').value.trim();
+    const msg = document.getElementById('cfg-kb-msg');
+    msg.textContent = '저장됨'; setTimeout(() => msg.textContent = '', 2000);
+  }
+}
+
+/* ════════════════════════════════
+   초기화
+════════════════════════════════ */
+renderMain();
+renderWoori();
+renderKB();
+</script>
+
+
+</body></html>
